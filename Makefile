@@ -25,14 +25,14 @@ LINKER = gcc
 LFLAGS = -Wall
 
 # Libraries to link into executable
-LIBS = 
+LIBS = -lcurl
 
-# Generic Makefile part, can be used to build any 
+# Generic Makefile part, can be used to build any
 # executable just by changing definitions above
 
 $(BINDIR)/$(TARGET): $(OBJS)
 	@mkdir -p $(BINDIR)
-	@$(LINKER) $(OBJS) $(LFLAGS) -o $@
+	@$(LINKER) $(OBJS) $(LFLAGS) -o $@ $(LIBS)
 	@echo "Linking done!"
 
 $(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
