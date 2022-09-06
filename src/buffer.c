@@ -2,6 +2,7 @@
 #include "buffer.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define BUFFER_INITIAL_SIZE 4096 // chars
 #define BUFFER_REALLOC_INCREMENT 1024 // chars
@@ -23,7 +24,8 @@ int buffer_init(buffer_t* instance) {
 
 int buffer_expand(buffer_t* instance, size_t increments) {
      size_t size_increment = BUFFER_REALLOC_INCREMENT * increments;
-     char* new_string = realloc(instance->string, (instance->chars_allocated + size_increment) * sizeof(*instance->string));
+     size_t new_size = (instance->chars_allocated + size_increment) * sizeof(*instance->string);
+     char* new_string = realloc(instance->string, new_size);
 
      if(new_string == NULL) {
         return -1;
@@ -43,7 +45,7 @@ int buffer_append(buffer_t* instance, char* const str, size_t size) {
     }
     /* String won't fit, expand buffer */
     if(size > instance->chars_left) {
-        /* Get full increments value */
+	/* Get full increments value */
         size_t chars_to_expand = size - instance->chars_left;
         size_t size_increments = chars_to_expand / BUFFER_REALLOC_INCREMENT;
 
@@ -61,6 +63,7 @@ int buffer_append(buffer_t* instance, char* const str, size_t size) {
 
     strncpy(instance->string + instance->position, str, size);
     instance->position += size;
+    instance->chars_left -= size;
     return 0;
 }
 
