@@ -1,30 +1,17 @@
 /* Created by Lefucjusz, 01.09.2022, Gdańsk */
 #include "GPIO.h"
-#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <curl/curl.h>
 #include <string.h>
-#include <stdbool.h>
 #include "buffer.h"
-#include <ctype.h>
 #include "HD44780.h"
 #include "parser.h"
+#include "display.h"
+#include <unistd.h>
+#include <errno.h>
 
 buffer_t response_buffer, line_buffer;
-
-static void debug_print_array(char* array, size_t size) {
-    for(size_t i = 0; i < size; i++) {
-        printf("%c", *(array + i));
-    }
-    printf(" (ASCII: ");
-    for(size_t i = 0; i < size; i++) {
-        printf("%d ", (int)*(array + i));
-    }
-    printf(")\n");
-}
-
-//TODO mapDiacritics
 
 static const char* const news_url = "https://tvn24.pl/najnowsze.xml";
 static const char* user_agent = "Mozilla/5.0";
@@ -65,6 +52,74 @@ int curl_test(void) {
     return 0;
 }
 
+/* Algorithm obtained via printing ASCII codes of diacritics... */
+static void remove_diacritics(char* stream) {
+    size_t length = strlen(stream);
+
+    for(size_t i = 0; i < length; i++) {
+        switch(stream[i]) {
+            case 195:
+                switch(stream[i + 1]) {
+                    case 147: // Ó
+                    case 179: // o
+                        stream[i + 1] = DISPLAY_POLISH_O;
+                        break;
+                    default:
+                        continue;
+                }
+                break;
+            case 196:
+                switch(stream[i + 1]) {
+                    case 132: // Ą
+                    case 133: // ą
+                        stream[i + 1] = DISPLAY_POLISH_A;
+                        break;
+                    case 134: // Ć
+                    case 135: // ć
+                        stream[i + 1] = DISPLAY_POLISH_C;
+                        break;
+                    case 152: // Ę
+                    case 153: // ę
+                        stream[i + 1] = DISPLAY_POLISH_E;
+                        break;
+                    default:
+                        continue;
+                }
+                break;
+            case 197: 
+                switch(stream[i + 1]) {
+                    case 129: // Ł
+                    case 130: // ł
+                        stream[i + 1] = DISPLAY_POLISH_L;
+                        break;
+                    case 131: // Ń
+                    case 132: // ń
+                        stream[i + 1] = DISPLAY_POLISH_N;
+                        break;
+                    case 154: // Ś
+                    case 155: // ś
+                        stream[i + 1] = DISPLAY_POLISH_S;
+                        break;
+                    case 185: // Ź
+                    case 186: // ź
+                    case 187: // Ż
+                    case 188: // ż
+                        stream[i + 1] = DISPLAY_POLISH_Z;
+                        break;
+                    default:
+                        continue;
+                }
+                break;
+            default:
+                continue;
+        }
+
+        size_t chars_left = length - i;
+        memmove(&stream[i], &stream[i + 1], chars_left); // Every diacritic is coded on 2 bytes - delete the first one
+        length--; // Remove that byte from the length too
+    }
+}
+
 int main(int argc, char** argv) {
     gpio_t gpio = gpio_init();
 
@@ -85,19 +140,24 @@ int main(int argc, char** argv) {
 		.on_off_flags = HD44780_DISPLAY_ON
     };
 
-    //HD44780_init(gpio, &lcd_config);
-
-    //HD44780_write_string("Elo!");
+    display_init(gpio, &lcd_config);
 
     buffer_init(&line_buffer);
     buffer_init(&response_buffer);
 
-    int ret = curl_test();
-    printf("Retcode: %d\n", ret);
+    while(1) {
+        int ret = curl_test();
+        printf("Retcode: %d\n", ret);
 
-    parser_parse(&response_buffer, &line_buffer);
+        parser_parse(&response_buffer, &line_buffer);
 
-    printf("%s\n", line_buffer.data);
+        remove_diacritics(line_buffer.data);
+
+        for(size_t i = 0; i < strlen(line_buffer.data); i++) {
+            display_update_row(line_buffer.data[i], DISPLAY_ROW_TOP);
+            usleep(100 * 1000);
+        }
+    }    
 
     buffer_deinit(&response_buffer);
     buffer_deinit(&line_buffer);
