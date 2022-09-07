@@ -2,6 +2,8 @@
 #ifndef __GPIO_H__
 #define __GPIO_H__
 
+typedef volatile unsigned int* gpio_t;
+
 /* See https://www.raspberry-pi-geek.com/howto/GPIO-Pinout-Rasp-Pi-1-Rev1-and-Rev2 for mapping */
 typedef enum {
     GPIO_PIN_3 = 0,
@@ -34,9 +36,9 @@ typedef enum {
 } gpio_pin_state_t;
 
 // TODO doxygen-style docs
-void* gpio_init(void);
-void gpio_set_pin_dir(volatile unsigned* const gpio, gpio_pin_t pin, gpio_pin_dir_t dir);
-void gpio_set_pin_state(volatile unsigned* const gpio, gpio_pin_t pin, gpio_pin_state_t state);
+gpio_t gpio_init(void);
+void gpio_set_pin_dir(gpio_t gpio, gpio_pin_t pin, gpio_pin_dir_t dir);
+void gpio_set_pin_state(gpio_t gpio, gpio_pin_t pin, gpio_pin_state_t state);
 int gpio_deinit(void);
 
 #endif

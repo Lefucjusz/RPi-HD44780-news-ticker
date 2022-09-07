@@ -5,17 +5,17 @@
 #include <stddef.h>
 
 typedef struct {
-    char* string;
+    char* data;
     size_t position;
-    size_t chars_allocated;
-    size_t chars_left;
+    size_t bytes_allocated;
+    size_t bytes_left;
 } buffer_t;
 
 //TODO doxygen
 
 int buffer_init(buffer_t* instance);
 int buffer_expand(buffer_t* instance, size_t increments);
-int buffer_append(buffer_t* instance, char* const str, size_t size);
+int buffer_append(buffer_t* instance, const char* const str, size_t size);
 void buffer_deinit(buffer_t* instance);
 
 #endif

@@ -28,7 +28,7 @@
 static const char* const mem_path = "/dev/mem";
 static void* gpio_map = NULL;
 
-void* gpio_init(void) {
+gpio_t gpio_init(void) {
     int mem_fd = open(mem_path, O_RDWR | O_SYNC);
 
     if(mem_fd < 0) {
@@ -42,16 +42,16 @@ void* gpio_init(void) {
         return NULL;
     }
 
-    return gpio_map;
+    return (gpio_t)gpio_map;
 }
 
-void gpio_set_pin_dir(volatile unsigned* const gpio, gpio_pin_t pin, gpio_pin_dir_t dir) {
+void gpio_set_pin_dir(gpio_t gpio, gpio_pin_t pin, gpio_pin_dir_t dir) { //TODO pin out of range check
     unsigned func_sel_reg = ((unsigned)pin) / BCM2835_PINS_PER_FUNC_SEL_REG;
     unsigned pin_in_reg = ((unsigned)pin) % BCM2835_PINS_PER_FUNC_SEL_REG;
     unsigned reg_offset = func_sel_reg + BCM2835_FUNC_SEL_REG_0_OFFSET; // Register offset
     unsigned pin_mask_offset = pin_in_reg * BCM2835_FUNC_SEL_BITS_PER_PIN; // Pin mask offset inside register
     
-    volatile unsigned* const func_sel_reg_addr = gpio + reg_offset;
+    gpio_t func_sel_reg_addr = gpio + reg_offset;
 
     switch(dir) {
         case GPIO_INPUT:
@@ -66,10 +66,10 @@ void gpio_set_pin_dir(volatile unsigned* const gpio, gpio_pin_t pin, gpio_pin_di
     }
 }
 
-void gpio_set_pin_state(volatile unsigned* const gpio, gpio_pin_t pin, gpio_pin_state_t state) {
+void gpio_set_pin_state(gpio_t gpio, gpio_pin_t pin, gpio_pin_state_t state) { //TODO pin out of range check
     unsigned out_reg = ((unsigned)pin) / BCM2835_PINS_PER_OUT_REG;
     unsigned pin_in_reg = ((unsigned)pin) % BCM2835_PINS_PER_OUT_REG;
-    volatile unsigned* out_reg_addr = NULL;
+    gpio_t out_reg_addr = NULL;
 
     switch(state) {
         case GPIO_LOW:
@@ -93,6 +93,8 @@ void gpio_set_pin_state(volatile unsigned* const gpio, gpio_pin_t pin, gpio_pin_
 
     *out_reg_addr = (1 << pin_in_reg);
 }
+
+//TODO read function
 
 int gpio_deinit(void) {
     int ret = munmap(gpio_map, BCM2835_GPIO_REGS_SIZE);
