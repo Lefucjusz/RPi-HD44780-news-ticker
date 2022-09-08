@@ -25,7 +25,7 @@ LINKER = gcc
 LFLAGS = -Wall
 
 # Libraries to link into executable
-LIBS = -lcurl
+LIBS = -lcurl -lpthread
 
 # Generic Makefile part, can be used to build any
 # executable just by changing definitions above

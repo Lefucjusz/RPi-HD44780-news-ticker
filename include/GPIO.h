@@ -1,4 +1,10 @@
-/* Created by Lefucjusz, 02.09.2022, Gdańsk */
+/*
+ * GPIO.h
+ *
+ *  Created on: 02.09.2022
+ *      Author: Lefucjusz
+ */
+
 #ifndef __GPIO_H__
 #define __GPIO_H__
 
@@ -42,3 +48,4 @@ void gpio_set_pin_state(gpio_t gpio, gpio_pin_t pin, gpio_pin_state_t state);
 int gpio_deinit(void);
 
 #endif
+

@@ -1,4 +1,10 @@
-/* Created by Lefucjusz, 02.09.2022, Gdańsk */
+/*
+ * GPIO.c
+ *
+ *  Created on: 02.09.2022
+ *      Author: Lefucjusz
+ */
+
 #include "GPIO.h"
 
 #include <sys/mman.h>

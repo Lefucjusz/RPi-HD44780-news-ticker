@@ -1,4 +1,10 @@
-/* Created by Lefucjusz, 06.09.2022, Gdańsk */
+/*
+ * buffer.c
+ *
+ *  Created on: 06.09.2022
+ *      Author: Lefucjusz
+ */
+
 #include "buffer.h"
 #include <stdlib.h>
 #include <string.h>
@@ -64,6 +70,11 @@ int buffer_append(buffer_t* instance, const char* const str, size_t size) {
     instance->position += size;
     instance->bytes_left -= size;
     return 0;
+}
+
+void buffer_reset(buffer_t* instance) {
+    instance->bytes_left = instance->bytes_allocated;
+    instance->position = 0;
 }
 
 void buffer_deinit(buffer_t* instance) {
