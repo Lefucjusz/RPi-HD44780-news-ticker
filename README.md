@@ -19,7 +19,7 @@ As it took me much less time than I thought I'd need, and I was in a mood for un
 pragmatism, joyful C development (yes, I find coding in C joyful; that explains quite a bit,
 huh...? :sweat_smile: ), I decided to challenge myself and port one of my
 previous projects, [rpi_vfd_ticker](https://github.com/Lefucjusz/rpi-vfd-ticker).
-Original project was written in JavaScript; I was curious how much harder it would be to 
+Original project was written in NodeJS; I was curious how much harder it would be to 
 implement the same functionalities in C. **Spoiler: it is a lot harder** :stuck_out_tongue: 
 Especially when it comes to parsing XMLs and memory management,`ASan` saved my life quite 
 a few times...
@@ -35,8 +35,24 @@ Additionally, current date and time are shown on the bottom line of the display.
 
 ## Hardware
 
+### Connections
+| Display signal | Raspberry Pi pin |
+|----------------|------------------|
+ | VCC/+5V        | 4                |
+ | VSS/GND        | 6                |
+ | RS             | 7                |
+| E              | 11               |
+ | D4             | 12               |
+ | D5             | 15               |
+ | D6             | 16               |
+ | D7             | 18               |
+
+_Note 1: pin numbers refer to physical goldpins, not to SoC GPIO numbers_
+
+_Note 2: connections mapping can be changed in HD44780 library config_ 
+
 ### Raspberry Pi
-Project uses Raspberry Pi 1 model B. I used such an old device just because it had been
+The project uses Raspberry Pi 1 model B. I used such an old device just because it had been
 lying in my drawer for a while already, as it's hard to find any reasonable application 
 for it. Its computing power is fairly limited as for today's standards...
 
@@ -101,7 +117,7 @@ program...
 
 #### Diacritic characters substitution
 
-This was supposed to be a quick makeshift solution, but since it worked suprisingly well - I left it 
+This was supposed to be a quick makeshift solution, but since it worked surprisingly well - I left it 
 as it was. The algorithm substituting Polish diacritics for HD44780 CGRAM addresses has been obtained 
 by reverse-engineering the format. ASCII codes of the characters were just printed to console and
 then hardcoded in a giant nested `switch...case`. There has to be a neater solution for this problem,
