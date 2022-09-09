@@ -12,8 +12,8 @@
 #define BUFFER_INITIAL_SIZE 4096 // bytes
 #define BUFFER_REALLOC_INCREMENT 1024 // bytes
 
-int buffer_init(buffer_t* instance) {
-    instance->data = malloc(BUFFER_INITIAL_SIZE * sizeof(*instance->data));
+int buffer_init(buffer_t* const instance) {
+    instance->data = malloc(BUFFER_INITIAL_SIZE);
     instance->position = 0;
 
     if(instance->data == NULL) {
@@ -27,10 +27,10 @@ int buffer_init(buffer_t* instance) {
     return 0;
 }
 
-int buffer_expand(buffer_t* instance, size_t increments) {
+int buffer_expand(buffer_t* const instance, size_t increments) {
      size_t size_increment = BUFFER_REALLOC_INCREMENT * increments;
-     size_t new_size = (instance->bytes_allocated + size_increment) * sizeof(*instance->data);
-     char* new_data = realloc(instance->data, new_size);
+     size_t new_size = instance->bytes_allocated + size_increment;
+     void* new_data = realloc(instance->data, new_size);
 
      if(new_data == NULL) {
         return -1;
@@ -42,11 +42,11 @@ int buffer_expand(buffer_t* instance, size_t increments) {
      return 0;
 }
 
-int buffer_append(buffer_t* instance, const char* const str, size_t size) {
+int buffer_append(buffer_t* const instance, const void* const data, size_t size) {
     /* Get length of data */
-    /* Warning - unsafe, str might be not null-terminated */
+    /* WARNING - UNSAFE, data might be not null-terminated or even not a string */
     if(size == 0) {
-        size = strlen(str);
+        size = strlen(data);
     }
     /* Data won't fit, expand buffer */
     if(size > instance->bytes_left) {
@@ -66,18 +66,19 @@ int buffer_append(buffer_t* instance, const char* const str, size_t size) {
         }
     }
 
-    strncpy(instance->data + instance->position, str, size);
+    /* Copy data and update internal state variables */
+    memcpy((char*)instance->data + instance->position, data, size);
     instance->position += size;
     instance->bytes_left -= size;
     return 0;
 }
 
-void buffer_reset(buffer_t* instance) {
+void buffer_reset(buffer_t* const instance) {
     instance->bytes_left = instance->bytes_allocated;
     instance->position = 0;
 }
 
-void buffer_deinit(buffer_t* instance) {
+void buffer_deinit(buffer_t* const instance) {
     free(instance->data);
     memset(instance, 0, sizeof(*instance));
 }

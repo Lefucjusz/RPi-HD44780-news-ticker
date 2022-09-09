@@ -10,6 +10,11 @@
 
 #include "buffer.h"
 
-int fetcher_fetch(buffer_t* fetched_data);
+/**
+ * @brief Fetches raw XML from TVN24 news API
+ * @param fetched_data Pointer to buffer instance to save fetched data in
+ * @return 0 if success, -1 if fetching failed
+ */
+int fetcher_fetch(buffer_t* const fetched_data);
 
 #endif

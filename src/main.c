@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <time.h>
 #include <pthread.h>
+#include <stdbool.h>
+#include <signal.h>
 #include "GPIO.h"
 #include "buffer.h"
 #include "HD44780.h"
@@ -18,14 +20,21 @@
 #include "display.h"
 #include "fetcher.h"
 
-pthread_mutex_t display_mutex;
+#define TICKER_REFRESH_DELAY_MS 120
 
-void* time_task(void* arg) {
+static pthread_mutex_t display_mutex;
+static volatile bool running = true;
+
+static void sigint_handler(int signal) {
+    running = false;
+}
+
+static void* time_task(void* arg) {
     char time_buffer[DISPLAY_COL_NUM + 1]; // One additional for null-terminator
     time_t timestamp;
     struct tm* time_info;
 
-    while(1) {
+    while(running) {
         time(&timestamp);
         time_info = localtime(&timestamp);
         strftime(time_buffer, DISPLAY_COL_NUM + 1, "%Y-%02m-%02d  %02H:%02M:%02S", time_info);
@@ -106,7 +115,14 @@ int main(int argc, char** argv) {
         return -4;
     }
 
-    while(1) {
+    /* Capture SIGINT (Ctrl^C) signal to gracefully terminate */
+    struct sigaction sigint_config = {0};
+    sigint_config.sa_handler = sigint_handler;
+    sigaction(SIGINT, &sigint_config, NULL);
+
+    printf("Ticker started!\n");
+
+    while(running) {
         /* Reset buffers state */
         buffer_reset(&raw_buffer);
         buffer_reset(&parsed_buffer);
@@ -115,7 +131,7 @@ int main(int argc, char** argv) {
         error = fetcher_fetch(&raw_buffer);
         if(error) {
             printf("Failed to fetch data! Retrying...\n");
-            usleep(1 * 1000 * 1000);
+            usleep(1 * 1000 * 1000); // Retry after 1 second
         }
 
         /* Parse data */
@@ -125,15 +141,19 @@ int main(int argc, char** argv) {
         display_substitute_diacritics(parsed_buffer.data);
 
         /* Display char by char to form moving ticker */
-        size_t ticker_length = strlen(parsed_buffer.data);
-        for(size_t i = 0; i < ticker_length; i++) {
+        const char* ticker_string = parsed_buffer.data;
+        size_t ticker_length = strlen(ticker_string);
+        for(size_t i = 0; running && i < ticker_length; i++) {
             pthread_mutex_lock(&display_mutex);
-            display_update_row(parsed_buffer.data[i], DISPLAY_ROW_TOP);
+            display_update_row(ticker_string[i], DISPLAY_ROW_TOP);
             pthread_mutex_unlock(&display_mutex);
 
-            usleep(120 * 1000);
+            usleep(TICKER_REFRESH_DELAY_MS * 1000);
         }
     }
+
+    /* Wait for time thread to terminate */
+    pthread_join(time_thread, NULL);
 
     /* Release resources */
     buffer_deinit(&raw_buffer);

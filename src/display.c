@@ -19,7 +19,7 @@ static const char diacritics[] = {
     0b00000, 0b00010, 0b11111, 0b00010, 0b00100, 0b01000, 0b11111, 0b00000  // ż
 };
 
-static char rows_buffer[DISPLAY_ROW_NUM][DISPLAY_COL_NUM];
+static char rows_buffer[DISPLAY_ROW_NUM][DISPLAY_COL_NUM + 1]; // One additional for null-terminator
 
 /* 
  * Algorithm obtained via reverse-engineering: printing ASCII codes of diacritics... 
@@ -31,9 +31,9 @@ void display_substitute_diacritics(char* const stream) {
     size_t length = strlen(stream);
 
     for(size_t i = 0; i < length; i++) {
-        switch(stream[i]) {
+        switch((int)stream[i]) {
             case 195:
-                switch(stream[i + 1]) {
+                switch((int)stream[i + 1]) {
                     case 147: // Ó
                     case 179: // o
                         stream[i + 1] = DISPLAY_POLISH_O;
@@ -43,7 +43,7 @@ void display_substitute_diacritics(char* const stream) {
                 }
                 break;
             case 196:
-                switch(stream[i + 1]) {
+                switch((int)stream[i + 1]) {
                     case 132: // Ą
                     case 133: // ą
                         stream[i + 1] = DISPLAY_POLISH_A;
@@ -61,7 +61,7 @@ void display_substitute_diacritics(char* const stream) {
                 }
                 break;
             case 197: 
-                switch(stream[i + 1]) {
+                switch((int)stream[i + 1]) {
                     case 129: // Ł
                     case 130: // ł
                         stream[i + 1] = DISPLAY_POLISH_L;
@@ -117,11 +117,12 @@ void display_update_row(char new_char, display_row_t row) {
     /* Move all chars in buffer one position left, discard leftmost */
     memmove(rows_buffer[row], rows_buffer[row] + 1, DISPLAY_COL_NUM);
 
-    /* Append new char at the end */
+    /* Append new char at the end and terminate string */
     rows_buffer[row][DISPLAY_COL_NUM - 1] = new_char;
-
+    rows_buffer[row][DISPLAY_COL_NUM] = '\0';
+    
     /* Display updated buffer */
-    HD44780_gotoxy((row + 1), 1); // Array is indexed from 0, rows are indexed from 1
+    HD44780_gotoxy(row + 1, 1); // Array is indexed from 0, rows are indexed from 1
     HD44780_write_string(rows_buffer[row]);
 }
 
@@ -140,10 +141,11 @@ void display_string_row(const char* const string, display_row_t row) {
         length = DISPLAY_COL_NUM;
     }
 
-    /* Load string to buffer */
+    /* Load string to buffer and terminate */
     memcpy(rows_buffer[row], string, length);
+    rows_buffer[row][DISPLAY_COL_NUM] = '\0';
 
     /* Display updated buffer */
-    HD44780_gotoxy((row + 1), 1); // Array is indexed from 0, rows are indexed from 1
+    HD44780_gotoxy(row + 1, 1); // Array is indexed from 0, rows are indexed from 1
     HD44780_write_string(rows_buffer[row]);
 }

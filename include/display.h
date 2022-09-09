@@ -43,9 +43,33 @@ typedef enum {
     DISPLAY_POLISH_Z
 } display_diacritics_t;
 
+/**
+ * @brief Substitutes polish diacritics for the corresponding HD44780 CGRAM addresses
+ * @param stream String to replace diacritics in
+ */
 void display_substitute_diacritics(char* const stream);
+
+/**
+ * @brief Initializes display
+ * @param gpio Raspberry PI GPIO driver handle
+ * @param config Struct with HD44780 display configuration
+ */
 void display_init(gpio_t gpio, HD44780_config_t* config);
+
+/**
+ * @brief Updates moving row - moves all characters one place left, discards the leftmost,
+ *        appends new at the end
+ *
+ * @param new_char Character to be appended
+ * @param row Display row to be updated
+ */
 void display_update_row(char new_char, display_row_t row);
+
+/**
+ * @brief Displays string in row
+ * @param string String to be displayed
+ * @param row Display row to show string in
+ */
 void display_string_row(const char* const string, display_row_t row);
 
 #endif

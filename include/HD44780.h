@@ -81,30 +81,25 @@ typedef struct {
 
 /**
  * @brief Initializes HD44780 display library
- *
  * @param config Pointer to struct with proper configuration set
  */
 void HD44780_init(gpio_t gpio, HD44780_config_t* const config);
 
 /**
  * @brief Writes one byte of data to display
- *
  * @param byte Value to be written to display
- *
  * @param mode Sets register to be written to - either instruction or character register
  */
 void HD44780_write_byte(uint8_t byte, HD44780_mode_t mode);
 
 /**
  * @brief Writes command (instruction) to HD44780 display, wrapper for HD44780_write_byte()
- *
  * @param Command to be written
  */
 void HD44780_write_cmd(uint8_t command);
 
 /**
  * @brief Writes character to HD44780 display, wrapper for HD44780_write_byte()
- *
  * @param Character to be written
  */
 void HD44780_write_char(char character);
@@ -116,7 +111,6 @@ void HD44780_clear(void);
 
 /**
  * @brief Moves the cursor to the requested position
- *
  * @param x Row to move to (indexed from 1!)
  * @param y Column to move to (indexed from 1!)
  */
@@ -124,7 +118,6 @@ void HD44780_gotoxy(uint8_t x, uint8_t y);
 
 /**
  * @brief Displays integer adding leading zeros if required
- *
  * @param number Integer to be displayed
  * @param length Required number of digits in the displayed number
  * 				 If value to be displayed has fewer digits than required,
@@ -134,14 +127,12 @@ void HD44780_write_integer(int32_t number, uint8_t length);
 
 /**
  * @brief Displays null-terminated string
- *
  * @param string Null-terminated string to be displayed
  */
 void HD44780_write_string(const char* string);
 
 /**
  * @brief Loads custom glyph to HD44780's CGRAM
- *
  * @param glyph_array Array containing glyph in required format
  * @param cgram_addr CGRAM address where the glyph will be stored
  */
@@ -149,7 +140,6 @@ void HD44780_load_custom_glyph(const uint8_t* const glyph_array, HD44780_glyph_a
 
 /**
  * @brief Loads all available CGRAM (8 glyphs) with custom glyphs
- *
  * @param glyphs_array Array containing 8 HD44780 glyphs in required format
  */
 void HD44780_load_custom_glyphs(const uint8_t* const glyphs_array);

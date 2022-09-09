@@ -41,10 +41,32 @@ typedef enum {
     GPIO_HIGH
 } gpio_pin_state_t;
 
-// TODO doxygen-style docs
+/**
+ * @brief Initializes Raspberry PI GPIO driver
+ * @return GPIO driver handle if success, NULL if failure
+ */
 gpio_t gpio_init(void);
+
+/**
+ * @brief Sets GPIO pin direction
+ * @param gpio Raspberry PI GPIO driver handle
+ * @param pin Pin to set direction
+ * @param dir Direction - input or output
+ */
 void gpio_set_pin_dir(gpio_t gpio, gpio_pin_t pin, gpio_pin_dir_t dir);
+
+/**
+ * @brief Sets GPIO pin state
+ * @param gpio Raspberry PI GPIO driver handle
+ * @param pin Pin to set state
+ * @param dir State - low or high
+ */
 void gpio_set_pin_state(gpio_t gpio, gpio_pin_t pin, gpio_pin_state_t state);
+
+/**
+ * @brief Deinitializes Raspberry PI GPIO driver
+ * @return 0 if success, -1 if failure
+ */
 int gpio_deinit(void);
 
 #endif

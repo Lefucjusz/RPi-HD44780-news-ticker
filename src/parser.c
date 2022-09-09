@@ -31,7 +31,7 @@
 
 static size_t get_tag_content(const char* const stream, const char* const tag, const char** const content) {
     /* Search for the tag */
-    char* start = strstr(stream, tag);
+    const char* start = strstr(stream, tag);
 
     /* If tag not found - set content to NULL and return zero length */
     if(start == NULL) {
@@ -56,7 +56,7 @@ static size_t get_tag_content(const char* const stream, const char* const tag, c
     }
 
     /* Obtain position of the end of the content */
-    char* end = NULL;
+    const char* end = NULL;
     if(is_cdata) {
         end = strchr(start, ']'); // Look for end of CDATA
     } else {
@@ -105,7 +105,7 @@ void parser_parse(const buffer_t* const stream, buffer_t* const result) {  //TOD
     /* Get number of items - this is very suboptimal way, but I see no better using this parsing approach */
     int items_number = 0;
     const char* temp_ptr = stream_ptr;
-    while((length = get_tag_content(temp_ptr, "<item>", &temp_ptr)) != 0) {
+    while(get_tag_content(temp_ptr, "<item>", &temp_ptr) != 0) {
         items_number++;
     }
 
@@ -127,7 +127,7 @@ void parser_parse(const buffer_t* const stream, buffer_t* const result) {  //TOD
         /* Append item description */
         length = get_tag_content(stream_ptr, "<description>", &stream_ptr);
         /* The description is preceded by an image contained in img src tag, skip it */
-        char* description = strchr(stream_ptr, '>') + PARSER_SPACE_AFTER_IMG_SRC_END_TAG + 1; // Find img src closing tag, skip it and 5 whitechars that are there
+        const char* const description = strchr(stream_ptr, '>') + PARSER_SPACE_AFTER_IMG_SRC_END_TAG + 1; // Find img src closing tag, skip it and 5 whitechars that are there
         size_t chars_skipped = description - stream_ptr;
         size_t description_length = length - chars_skipped; // Decrease length value by the number of skipped chars
 

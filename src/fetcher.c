@@ -20,7 +20,7 @@ static size_t curl_callback(void* data, size_t size, size_t nmemb, void* data_bu
     return real_size;
 }
 
-int fetcher_fetch(buffer_t* fetched_data) {
+int fetcher_fetch(buffer_t* const fetched_data) {
     CURL* curl_instance = NULL;
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
