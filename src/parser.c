@@ -136,5 +136,5 @@ void parser_parse(const buffer_t* const stream, buffer_t* const result) {  //TOD
 
         current_item++;
     };
-    buffer_append(result, "\n\0", 0);
+    buffer_append(result, "\0", 0);
 }

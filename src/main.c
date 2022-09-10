@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
         display_substitute_diacritics(parsed_buffer.data);
 
         /* Display char by char to form moving ticker */
-        const char* ticker_string = parsed_buffer.data;
+        const char* const ticker_string = parsed_buffer.data;
         size_t ticker_length = strlen(ticker_string);
         for(size_t i = 0; running && i < ticker_length; i++) {
             pthread_mutex_lock(&display_mutex);
