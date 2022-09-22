@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
     error = buffer_init(&parsed_buffer);
     if(error) {
         printf("Not enough memory to allocate parsed data buffer!\n");
-        
+
         /* Release resources */
         buffer_deinit(&raw_buffer);
         gpio_deinit();
@@ -128,20 +128,20 @@ int main(int argc, char** argv) {
         buffer_reset(&parsed_buffer);
 
         /* Fetch new data */
-        error = fetcher_fetch(&raw_buffer);
-        if(error) {
+        while((error = fetcher_fetch(&raw_buffer)) != 0) {
             printf("Failed to fetch data! Retrying...\n");
             usleep(1 * 1000 * 1000); // Retry after 1 second
         }
+	printf("New data fetched!\n");
 
         /* Parse data */
         parser_parse(&raw_buffer, &parsed_buffer); // TODO error handling, as there's A LOT of things that might fail in parser...
 
         /* Substitute polish diacritic codes for HD44780 custom char codes */
-        display_substitute_diacritics(parsed_buffer.data);
+        char* const ticker_string = parsed_buffer.data;
+        display_substitute_diacritics(ticker_string);
 
         /* Display char by char to form moving ticker */
-        const char* const ticker_string = parsed_buffer.data;
         size_t ticker_length = strlen(ticker_string);
         for(size_t i = 0; running && i < ticker_length; i++) {
             pthread_mutex_lock(&display_mutex);
