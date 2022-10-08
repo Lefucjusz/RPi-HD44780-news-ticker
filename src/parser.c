@@ -5,12 +5,14 @@
  *      Author: Lefucjusz
  */
 
+#define _XOPEN_SOURCE // Required for strptime()
 #include "parser.h"
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h>
 
 /*
  * Used to create news number indicator.
@@ -26,8 +28,7 @@
 #define PARSER_SPACE_AFTER_IMG_SRC_END_TAG 5
 
 /* Used to parse last update time */
-#define PARSER_DATE_LENGTH 10 // YYYY-MM-DD
-#define PARSER_TIME_LENGTH 8 // HH:MM:SS
+#define TIME_BUFFER_SIZE 32
 
 static size_t get_tag_content(const char* const stream, const char* const tag, const char** const content) {
     /* Search for the tag */
@@ -95,12 +96,12 @@ void parser_parse(const buffer_t* const stream, buffer_t* const result) {  //TOD
     buffer_append(result, "# ostatnia aktualizacja: ", 0);
 
     /* Append date */
+    struct tm time;
+    char time_str[TIME_BUFFER_SIZE];
     get_tag_content(stream_ptr, "<lastBuildDate>", &stream_ptr);
-    /* Date is in YYYY-MM-DDTHH:MM:SS.000Z format, parse to get YYYY-MM-DD HH:MM:SS format */
-    buffer_append(result, stream_ptr, PARSER_DATE_LENGTH);
-    buffer_append(result, " ", 0);
-    buffer_append(result, stream_ptr + PARSER_DATE_LENGTH + 1, PARSER_TIME_LENGTH); // +1 to skip 'T'
-    buffer_append(result, " ", 0);
+    strptime(stream_ptr, "%a, %d %b %Y %T", &time);
+    strftime(time_str, TIME_BUFFER_SIZE, "%Y-%m-%d %X ", &time);
+    buffer_append(result, time_str, 0);
 
     /* Get number of items - this is very suboptimal way, but I see no better using this parsing approach */
     int items_number = 0;

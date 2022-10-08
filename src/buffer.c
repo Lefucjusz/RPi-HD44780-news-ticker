@@ -37,7 +37,7 @@ int buffer_expand(buffer_t* const instance, size_t increments) {
      }
 
      instance->data = new_data;
-     instance->bytes_allocated += size_increment;
+     instance->bytes_allocated = new_size;
      instance->bytes_left += size_increment;
      return 0;
 }

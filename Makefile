@@ -16,7 +16,7 @@ OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 CC = gcc
 
 # Compiler flags
-CFLAGS = -Wall -I$(INCDIR)
+CFLAGS = -Wall -Wno-format-truncation -O3 -std=gnu99 -I$(INCDIR)
 
 # Linker to use
 LINKER = gcc
